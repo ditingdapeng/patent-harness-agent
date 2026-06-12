@@ -1,0 +1,152 @@
+{
+  "project": "patent-disclosure-generation-harness",
+  "version": "0.1.0",
+  "output": "res/专利交底书.docx",
+  "features": [
+    {
+      "id": "feat-000",
+      "name": "建立 Harness 控制面",
+      "agent": "HarnessDesigner",
+      "status": "completed",
+      "depends_on": [],
+      "input_paths": ["doc/", "model/", "content/reborn-harness/", ".claude/skills/"],
+      "output_paths": ["AGENTS.md", "feature_list.json", "workflow/", "progress.md", "session-handoff.md"],
+      "verification": ["test -f AGENTS.md", "test -f feature_list.json", "test -f workflow/patent-disclosure-workflow.md"],
+      "evidence": "2026-06-12: Harness 控制文件全部写入"
+    },
+    {
+      "id": "feat-001",
+      "name": "抽取模板约束和输入清单",
+      "agent": "ManifestAgent",
+      "status": "pending",
+      "depends_on": ["feat-000"],
+      "input_paths": ["doc/", "model/"],
+      "output_paths": ["intermediate/00_manifest/manifest.json", "intermediate/00_manifest/template_constraints.json", "intermediate/00_manifest/reference_style.json"],
+      "verification": ["test -f intermediate/00_manifest/manifest.json", "test -f intermediate/00_manifest/template_constraints.json", "test -f intermediate/00_manifest/reference_style.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-002",
+      "name": "生成技术方案骨架",
+      "agent": "SkeletonAgent",
+      "status": "pending",
+      "depends_on": ["feat-001"],
+      "input_paths": ["intermediate/00_manifest/", "content/reborn-harness/"],
+      "output_paths": ["intermediate/01_skeleton/skeleton.json", "intermediate/01_skeleton/section_plan.md", "intermediate/01_skeleton/terminology.md", "intermediate/01_skeleton/traceability_seed.json"],
+      "verification": ["test -f intermediate/01_skeleton/skeleton.json", "test -f intermediate/01_skeleton/traceability_seed.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-003",
+      "name": "生成现有技术和缺点基线 (D0)",
+      "agent": "D0PriorArtBaselineAgent",
+      "status": "pending",
+      "depends_on": ["feat-002"],
+      "input_paths": ["intermediate/01_skeleton/", "content/reborn-harness/"],
+      "output_paths": ["intermediate/02_prior_art_baseline/prior_art_baseline.json", "intermediate/02_prior_art_baseline/prior_art_baseline.md"],
+      "verification": ["test -f intermediate/02_prior_art_baseline/prior_art_baseline.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-004A",
+      "name": "生成发明目的 (1.1)",
+      "agent": "PurposeAgent",
+      "status": "pending",
+      "depends_on": ["feat-003"],
+      "input_paths": ["intermediate/01_skeleton/", "intermediate/02_prior_art_baseline/", "intermediate/00_manifest/reference_style.json"],
+      "output_paths": ["intermediate/03_parallel/A_purpose/purpose.json", "intermediate/03_parallel/A_purpose/purpose.md"],
+      "verification": ["test -f intermediate/03_parallel/A_purpose/purpose.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-004B",
+      "name": "生成后台技术方案 (2.1)",
+      "agent": "BackendSolutionAgent",
+      "status": "pending",
+      "depends_on": ["feat-003"],
+      "input_paths": ["intermediate/01_skeleton/", "intermediate/02_prior_art_baseline/", "content/reborn-harness/"],
+      "output_paths": ["intermediate/03_parallel/B_backend/backend_solution.json", "intermediate/03_parallel/B_backend/backend_solution.md"],
+      "verification": ["test -f intermediate/03_parallel/B_backend/backend_solution.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-004C",
+      "name": "生成前端交互方案 (2.2)",
+      "agent": "FrontendInteractionAgent",
+      "status": "pending",
+      "depends_on": ["feat-003"],
+      "input_paths": ["intermediate/01_skeleton/", "intermediate/02_prior_art_baseline/", "intermediate/03_parallel/B_backend/backend_solution.json"],
+      "output_paths": ["intermediate/03_parallel/C_frontend/frontend_solution.json", "intermediate/03_parallel/C_frontend/frontend_solution.md"],
+      "verification": ["test -f intermediate/03_parallel/C_frontend/frontend_solution.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-004D",
+      "name": "深度业界检索 (3.1 / 3.2)",
+      "agent": "ResearchAgent",
+      "status": "pending",
+      "depends_on": ["feat-003"],
+      "input_paths": ["intermediate/01_skeleton/", "intermediate/02_prior_art_baseline/"],
+      "output_paths": ["intermediate/03_parallel/D_research/research.json", "intermediate/03_parallel/D_research/research.md"],
+      "human_required": true,
+      "human_required_reason": "专利/论文/竞品真实性必须人工确认，不得由模型臆造",
+      "verification": ["test -f intermediate/03_parallel/D_research/research.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-005E",
+      "name": "生成附图说明和 Graphviz 产物 (2.3)",
+      "agent": "FigureAgent",
+      "status": "pending",
+      "depends_on": ["feat-004B", "feat-004C"],
+      "input_paths": ["intermediate/03_parallel/B_backend/", "intermediate/03_parallel/C_frontend/"],
+      "output_paths": ["intermediate/04_derived/E_figures/figures.json", "intermediate/04_derived/E_figures/figures.md", "ai_think/20260612/dot/", "ai_think/20260612/images/"],
+      "verification": ["test -f intermediate/04_derived/E_figures/figures.json", "test -d ai_think/20260612/images/"],
+      "evidence": null
+    },
+    {
+      "id": "feat-005F",
+      "name": "生成替代方案和区别点 (2.4 + 3.2)",
+      "agent": "AlternativeAgent",
+      "status": "pending",
+      "depends_on": ["feat-004B", "feat-004C", "feat-004D"],
+      "input_paths": ["intermediate/03_parallel/B_backend/", "intermediate/03_parallel/C_frontend/", "intermediate/03_parallel/D_research/"],
+      "output_paths": ["intermediate/04_derived/F_alternatives/alternatives.json", "intermediate/04_derived/F_alternatives/alternatives.md"],
+      "verification": ["test -f intermediate/04_derived/F_alternatives/alternatives.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-006",
+      "name": "对抗审查",
+      "agent": "ReviewAgent",
+      "status": "pending",
+      "depends_on": ["feat-004A", "feat-004B", "feat-004C", "feat-004D", "feat-005E", "feat-005F"],
+      "input_paths": ["intermediate/03_parallel/", "intermediate/04_derived/", "intermediate/01_skeleton/traceability_seed.json", "intermediate/00_manifest/template_constraints.json"],
+      "output_paths": ["intermediate/05_review/review_report.json", "intermediate/05_review/review_report.md", "intermediate/05_review/revision_tasks.json"],
+      "verification": ["test -f intermediate/05_review/review_report.json"],
+      "evidence": null
+    },
+    {
+      "id": "feat-007",
+      "name": "修订并生成临时 docx",
+      "agent": "RevisionAgent",
+      "status": "pending",
+      "depends_on": ["feat-006"],
+      "input_paths": ["intermediate/05_review/revision_tasks.json", "intermediate/03_parallel/", "intermediate/04_derived/", "model/专利技术方案交底书模板.docx"],
+      "output_paths": ["intermediate/06_revision/final_markdown.md", "intermediate/06_revision/final_payload.json", "res/.tmp_专利交底书.docx"],
+      "verification": ["test -f intermediate/06_revision/final_markdown.md", "test -f res/.tmp_专利交底书.docx"],
+      "evidence": null
+    },
+    {
+      "id": "feat-008",
+      "name": "Release 最终专利交底书",
+      "agent": "ReleaseAgent",
+      "status": "pending",
+      "depends_on": ["feat-006"],
+      "input_paths": ["intermediate/06_revision/final_markdown.md", "res/.tmp_专利交底书.docx"],
+      "output_paths": ["res/专利交底书.docx", "intermediate/07_release/release_manifest.json"],
+      "verification": ["test -f res/专利交底书.docx"],
+      "evidence": null
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+# Generated outputs
+intermediate/
+res/
+
+# OS files
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Temp files
+*.tmp
+.tmp_*
+
+# Excluded from repo
+doc/
+content/
+
+# .claude - only keep docx and graphviz skills
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/docx/
+!.claude/skills/rebornai-graphviz/
+.claude/
+ai_think/
